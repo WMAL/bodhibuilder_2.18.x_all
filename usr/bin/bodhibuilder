@@ -415,37 +415,39 @@ cdfs (){
       #~ chmod +x /usr/share/applications/kde4/ubiquity-kdeui.desktop &> /dev/null
       #~ sed -i "s/ubiquity kde_ui/pkexec ubiquity kde_ui/" /usr/share/applications/kde4/ubiquity-kdeui.desktop
   #~ else
-      log_msg "Installing the Ubiquity GTK frontend"
-      ubiquity_frontend_gtk_status=`dpkg --get-selections | grep ubiquity-frontend-gtk`
-      if [ "${ubiquity_frontend_gtk_status}" ] ; then
+      # Warith changes for Linux Kodachi
+      log_msg "Not Installing the Ubiquity GTK frontend"
+      #ubiquity_frontend_gtk_status=`dpkg --get-selections | grep ubiquity-frontend-gtk`
+      #if [ "${ubiquity_frontend_gtk_status}" ] ; then
         #~ apt-get -y -q remove ubiquity-frontend-gtk &> /dev/null
-        apt-get -y -q remove ubiquity-frontend-gtk &>> ${WORKDIR}/bodhibuilder.log
-        sleep 1
-      else
-        echo "ubiquity-frontend-gtk not initially installed" >> ${WORKDIR}/bodhibuilder.log
-      fi
+        #apt-get -y -q remove ubiquity-frontend-gtk &>> ${WORKDIR}/bodhibuilder.log
+        #sleep 1
+     # else
+      #  echo "ubiquity-frontend-gtk not initially installed" >> ${WORKDIR}/bodhibuilder.log
+      #fi
       # install ubiquity-frontend-gtk regardless
       #~ apt-get -y -q install ubiquity-frontend-gtk &> /dev/null
-      apt-get -y -q install ubiquity-frontend-gtk &>> ${WORKDIR}/bodhibuilder.log
-      sleep 1
-      ubiquity_frontend_kde_status=`dpkg --get-selections | grep ubiquity-frontend-kde`
-      if [ "${ubiquity_frontend_kde_status}" ] ; then
+      #apt-get -y -q install ubiquity-frontend-gtk &>> ${WORKDIR}/bodhibuilder.log
+     # sleep 1
+     # ubiquity_frontend_kde_status=`dpkg --get-selections | grep ubiquity-frontend-kde`
+      #if [ "${ubiquity_frontend_kde_status}" ] ; then
         #~ apt-get -y -q remove ubiquity-frontend-kde &> /dev/null
-        apt-get -y -q remove ubiquity-frontend-kde &>> ${WORKDIR}/bodhibuilder.log
-        sleep 1
-      else
-        echo "ubiquity-frontend-kde not initially installed" >> ${WORKDIR}/bodhibuilder.log
-      fi
+        #apt-get -y -q remove ubiquity-frontend-kde &>> ${WORKDIR}/bodhibuilder.log
+        #sleep 1
+     # else
+        #echo "ubiquity-frontend-kde not initially installed" >> ${WORKDIR}/bodhibuilder.log
+      #fi
       # double-check for ubiquity-frontend-gtk installation
       # cuz if it's not installed ubiquity won't work
-      ubiquity_frontend_gtk_status=`dpkg --get-selections | grep ubiquity-frontend-gtk`
-      if [ ! "${ubiquity_frontend_gtk_status}" ] ; then
+      #ubiquity_frontend_gtk_status=`dpkg --get-selections | grep ubiquity-frontend-gtk`
+      #if [ ! "${ubiquity_frontend_gtk_status}" ] ; then
         #~ apt-get -y -q install ubiquity-frontend-gtk &> /dev/null
-        apt-get -y -q install ubiquity-frontend-gtk &>> ${WORKDIR}/bodhibuilder.log
-        sleep 1
-      else
-        echo "ubiquity-frontend-gtk installed -- re-check" >> ${WORKDIR}/bodhibuilder.log
-      fi
+        #apt-get -y -q install ubiquity-frontend-gtk &>> ${WORKDIR}/bodhibuilder.log
+        #sleep 1
+      #else
+       # echo "ubiquity-frontend-gtk installed -- re-check" >> ${WORKDIR}/bodhibuilder.log
+     # fi
+     
   #~ fi
 
   # now, restore a ubiquity.desktop if it was saved before installing ubiquity-frontend-gtk
@@ -585,14 +587,16 @@ cdfs (){
     fi
   fi
 
+  # Warith changes for Linux Kodachi
   # Put a custom name into grub - need to use DISTRIB_DESCRIPTION rather than DISTRIB_ID
   if [ "${DISTNAME}" ] ; then
     if [ -e "${WORKDIR}/dummysys/etc/lsb-release" ] ; then
+      							#Don't change Ubuntu or UEFI won't work after install	
       sed -i "s/^DISTRIB_DESCRIPTION=.*$/DISTRIB_DESCRIPTION=\"Ubuntu\"/" ${WORKDIR}/dummysys/etc/lsb-release
-      sed -i 's/^GRUB_DISTRIBUTOR=.*$/GRUB_DISTRIBUTOR=\`lsb_release -d -s 2> \/dev\/null || echo Debian\`/' ${WORKDIR}/dummysys/etc/default/grub.bodhi
-      sed -i 's/^GRUB_DISTRIBUTOR=.*$/GRUB_DISTRIBUTOR=\`lsb_release -d -s 2> \/dev\/null || echo Debian\`/' ${WORKDIR}/dummysys/etc/default/grub
+      sed -i 's/^GRUB_DISTRIBUTOR=.*$/GRUB_DISTRIBUTOR=\`lsb_release -d -s 2> \/dev\/null || echo Kodachi\`/' ${WORKDIR}/dummysys/etc/default/grub.bodhi
+      sed -i 's/^GRUB_DISTRIBUTOR=.*$/GRUB_DISTRIBUTOR=\`lsb_release -d -s 2> \/dev\/null || echo Kodachi\`/' ${WORKDIR}/dummysys/etc/default/grub
     else
-      sed -i 's/^GRUB_DISTRIBUTOR=.*$/GRUB_DISTRIBUTOR=Ubuntu/' ${WORKDIR}/dummysys/etc/default/grub
+     sed -i 's/^GRUB_DISTRIBUTOR=.*$/GRUB_DISTRIBUTOR=Kodachi/' ${WORKDIR}/dummysys/etc/default/grub
     fi
   fi
 
@@ -765,6 +769,8 @@ cdfs (){
 
   if [ "${inetstatus}" -eq 0 ] ; then # internet connection detected
     log_msg "connection to internet detected"
+	# Warith changes for Linux Kodachi
+	sudo apt update
     # make sure apt-get cache is updated, or it might try to download the wrong version
     log_msg "Updating repos"
     apt-get update >>${WORKDIR}/bodhibuilder.log
@@ -808,7 +814,7 @@ cdfs (){
       cd ${WORKDIR} && rm -rf ./dlpkgtempdir
     fi
 
-
+	
   else # no internet connection detected
     log_msg "no connection to internet detected"
     log_msg "...not downloading latest uefi pool debs"
@@ -875,6 +881,9 @@ cdfs (){
       yes | cp -av /etc/bodhibuilder/debs/i386/* /etc/bodhibuilder/uefi/dists/pool/ >>${WORKDIR}/bodhibuilder.log
     fi
   fi
+  
+  
+  
 
   # Creating a repository for the Ubiquity install
   #  Note: in order for this to work correctly, the source system
@@ -900,6 +909,11 @@ cdfs (){
   log_msg "Copying memtest86+ for the live system"
   cp /boot/memtest86+.bin ${WORKDIR}/ISOTMP/install/memtest
 
+  # Warith changes for Linux Kodachi
+  log_msg "Start cleaning process by Warith"
+  sudo apt clean
+  sudo apt autoclean
+  bleachbit --list | grep apt|xargs sudo bleachbit --clean
 
   # check and see if they have a custom isolinux already setup. eg. they copied over
   # the isolinux folder from their original livecd or made a custom one for their distro
@@ -947,7 +961,8 @@ FOO
   # Step 4 - Make the filesystem.manifest and filesystem.manifest-desktop
   log_msg "Creating filesystem.manifest and filesystem.manifest-desktop"
   # May need to make change below on 'dpkg-query' line because 'version' var is not assigned earlier
-  #~ dpkg-query -W --showformat='${Package} ${Version}\n' > ${WORKDIR}/ISOTMP/casper/filesystem.manifest
+  # Warith changes for Linux Kodachi
+  dpkg-query -W --showformat='${Package} ${Version}\n' > ${WORKDIR}/ISOTMP/casper/filesystem.manifest
   cp ${WORKDIR}/ISOTMP/casper/filesystem.manifest ${WORKDIR}/ISOTMP/casper/filesystem.manifest-desktop
 
   # Suggested by lkjoel from Ubuntu Forums - Joel Leclerc to remove the frontend so the Install menu item is not on the installed system
@@ -990,7 +1005,8 @@ FOO
         log_msg "liveuser_check failed, attempting to set based on current username '${LIVEUSER}'"
         if [ "`who -u | grep -v root | cut -d " " -f1 | uniq | wc -l`" != "1" ] ; then
             log_msg "couldn't find '${LIVEUSER}', attempting using default uid 1000"
-            LIVEUSER="`grep '^[^:]*:[^:]*:1000:' /etc/passwd | awk -F ":" '{ print $1 }'`"
+            # Warith changes for Linux Kodachi
+            LIVEUSER="`grep '^[^:]*:[^:]*:990:' /etc/passwd | awk -F ":" '{ print $1 }'`"
         fi
       else
         log_msg "LIVEUSER '${LIVEUSER}' was found"
@@ -1097,8 +1113,9 @@ FOO
 # USERNAME, USERFULLNAME, HOST, BUILD_SYSTEM
 
 export USERNAME="${LIVEUSER}"
-export USERFULLNAME="Live session user"
-export HOST="${LIVEUSER}"
+export USERFULLNAME="Live session user"	 
+# Warith changes for Linux Kodachi
+export HOST="${HOSTNAME}"
 export BUILD_SYSTEM="Ubuntu"
 export FLAVOUR="${LIVEUSER}"
 FOO
