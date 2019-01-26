@@ -60,7 +60,7 @@ do_start() {
         #
         ### Place your custom commands below this line
         # Warith changes made for Linux Kodachi	
-	    apt-get purge bodhibuilder --yes --assume-yes
+	apt-get purge bodhibuilder --yes --assume-yes
         apt-get --yes --assume-yes autoremove
         
         ### Place your custom commands above this line
